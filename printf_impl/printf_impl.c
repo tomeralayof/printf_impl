@@ -22,6 +22,29 @@ static void handleSpecialCharacter(char *temp, char **str, char *buff, int *i, v
 static void handleRecularCharacter(char *temp, char **str, char *buff, int *i, va_list ap);
 static handle_characters lut_options[2] = {&handleRecularCharacter, &handleSpecialCharacter};
 
+int print(char *str, ...)
+{
+    int i = 0;
+    va_list ap;
+    char buff[100] = {0}, temp[100] = {0};
+    va_start(ap, str);
+
+    initLut();
+
+    for (; *str != '\0'; ++str)
+    {
+        lut_options[*str == '%'](temp, (char **)&str, buff, &i, ap);
+    }
+
+    buff[i] = '\n';
+
+    fwrite(buff, strlen(buff), 1, stdout);
+
+    va_end(ap);
+
+    return strlen(buff);
+}
+
 static void initLut()
 {
     int i = 0;
@@ -47,29 +70,6 @@ static void handleRecularCharacter(char *temp, char **str, char *buff, int *i, v
     (void)ap;
 
     *(buff + (*i)++) = **str;
-}
-
-int print(char *str, ...)
-{
-    int i = 0;
-    va_list ap;
-    char buff[100] = {0}, temp[100] = {0};
-    va_start(ap, str);
-
-    initLut();
-
-    for (; *str != '\0'; ++str)
-    {
-        lut_options[*str == '%'](temp, (char **)&str, buff, &i, ap);
-    }
-
-    buff[i] = '\n';
-
-    fwrite(buff, strlen(buff), 1, stdout);
-
-    va_end(ap);
-
-    return strlen(buff);
 }
 
 static void printInt(char *temp, char *buff, int *i, va_list ap)
